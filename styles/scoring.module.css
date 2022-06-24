@@ -79,8 +79,29 @@
     font-size: 2vw;
 }
 
-.timer {
+.timerWrapper {
     width: 20vw;
+}
+
+.timer {
+    font-size: 7.7vw;
+}
+
+.roundTitle {
+    font-size: 3vw;
+    line-height: normal;
+}
+
+.roundNumber {
+    font-size: 4vw;
+    line-height: normal;
+}
+
+.cogIcon {
+    font-size: 4vw;
+}
+.settingTitle {
+    font-size: 3vw;
 }
 
 @media (max-width: 1200px) {
