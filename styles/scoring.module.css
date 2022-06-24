@@ -71,7 +71,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    
+
 }
 
 .scoreFooter {
@@ -86,5 +86,24 @@
 @media (max-width: 1200px) {
     .board:after {
         padding-bottom: 60%;
+    }
+}
+
+@media (max-width: 991px) {
+    .scoreFooter {
+        height: 10vh;
+    }
+}
+
+@media (max-width: 767px) {
+    .scoreFooter {
+        height: 7vh;
+    }
+}
+
+@media (max-width: 575px) {
+    .scoreFooter {
+        height: 7vh;
+        font-size: 2.5vw;
     }
 }
