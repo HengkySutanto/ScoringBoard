@@ -27,11 +27,13 @@
 
 .classCategory {
     font-size: 4vw;
-    padding: .25rem 0;
+    line-height: 1;
+    padding: .5rem;
 }
 
 .contingent {
     font-size: 3vw;
+    line-height: 1;
 }
 
 .contestant {
@@ -83,25 +85,45 @@
     width: 20vw;
 }
 
+.timerTitle {
+    font-size: 2vw;
+}
+
 .timer {
     font-size: 7.7vw;
 }
 
 .roundTitle {
     font-size: 3vw;
-    line-height: normal;
+    font-weight: bold;
+    line-height: 1;
 }
 
 .roundNumber {
-    font-size: 4vw;
-    line-height: normal;
+    font-size: 5vw;
+    font-weight: bold;
+    line-height: 1;
 }
 
 .cogIcon {
     font-size: 4vw;
 }
+
 .settingTitle {
     font-size: 3vw;
+}
+
+.modalCard {
+    min-width: 50%;
+    max-width: 90%;
+}
+
+.modalTitle {
+    font-size: 3vw;
+}
+
+.modalContent {
+    font-size: 1.5vw;
 }
 
 @media (max-width: 1200px) {
@@ -126,5 +148,13 @@
     .scoreFooter {
         height: 7vh;
         font-size: 2.5vw;
+    }
+
+    .modalTitle {
+        font-size: 4vw;
+    }
+
+    .modalContent {
+        font-size: 3vw;
     }
 }
