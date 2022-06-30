@@ -49,7 +49,7 @@
 }
 
 .score {
-    font-size: 15vw;
+    font-size: 17vw;
 }
 
 .gamjum {
@@ -122,8 +122,18 @@
     font-size: 3vw;
 }
 
+.modalTitleWinner {
+    font-size: 10vw;
+    line-height: 1;
+}
+
 .modalContent {
     font-size: 1.5vw;
+}
+
+.modalContentWinner {
+    font-size: 4.5vw;
+    line-height: 1;
 }
 
 @media (max-width: 1200px) {
@@ -156,5 +166,9 @@
 
     .modalContent {
         font-size: 3vw;
+    }
+
+    .startStop {
+        font-size: 2.3vw;
     }
 }

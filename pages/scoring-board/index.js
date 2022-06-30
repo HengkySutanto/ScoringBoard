@@ -2,21 +2,30 @@ import { useEffect, useState } from 'react';
 import styles from '../../styles/Scoring.module.css'
 import { FaCog, FaMinus, FaPlus } from 'react-icons/fa'
 import SettingScores from '../../components/SettingScores';
+import ConfirmStop from '../../components/modals/ConfirmStop';
+import Gamjeums from '../../components/Gamjeums';
+import RoundTimer from '../../components/RoundTimer';
+import NextRound from '../../components/modals/NextRound';
+import DeclareWinner from '../../components/modals/DeclareWinner';
+import DeclaredAsWinner from '../../components/modals/DeclaredAsWinner';
 
 const ScoringBoard = () => {
     const [settings, setSettings] = useState(false)
+    const [round, setRound] = useState(1)
     const [scoreBlue, setScoreBlue] = useState(0)
     const [scoreRed, setScoreRed] = useState(0)
     const [gamjeumRed, setGamjeumRed] = useState(0)
     const [gamjeumBlue, setGamjeumBlue] = useState(0)
-    const [timeSecond, setTimeSecond] = useState(30)
-    const [timeMinute, setTimeMinute] = useState(1)
+    const [timeSecond, setTimeSecond] = useState(10)
+    const [timeMinute, setTimeMinute] = useState(0)
     const [intervalId, setIntervalId] = useState(false);
     const [confirmStop, setConfirmStop] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [showNextRoundModal, setShowNextRoundModal] = useState(false);
+    const [showDeclareWinnerModal, setShowDeclareWinnerModal] = useState(false);
+    const [declaredAsWinner, setDeclaredAsWinner] = useState("");
+    const [showDeclareAsWinnerModal, setShowDeclareAsWinnerModal] = useState(false);
 
-    const RedGamjeums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const BlueGamjeums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    const gamjeumsCounter = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     useEffect(() => {
         if (timeSecond < 0) {
@@ -25,28 +34,76 @@ const ScoringBoard = () => {
                 setTimeMinute(prevTimeMinute => prevTimeMinute - 1);
             } else {
                 resetTimer()
+                if (round < 3) {
+                    show_NextRoundModal()
+                } else {
+                    declareWinner()
+                }
             }
         }
     }, [timeSecond])
-    console.log("setting",settings)
+
     useEffect(() => {
         function onKeyup(e) {
-            console.log("testeer", e.key, settings)
+            // START/PAUSE TIMER
             if (e.key == " " && !settings) {
-                console.log("space", settings)
-                handleClick() 
+                handleClick()
             }
-            if (e.key == "Escape") {
-                if (intervalId && intervalId !== "pause") {
-                    clearInterval(intervalId);
-                    setIntervalId("pause");
-                }
+
+            // OPEN SETTINGS
+            if (e.key == "Escape" && !confirmStop) {
+                pauseTimer()
                 setSettings(prevSettings => !prevSettings)
+            }
+
+            // ADD POINTS TO CONTESTANTS
+            if (!confirmStop && !settings && intervalId && intervalId !== "pause") {
+                // ADD TO BLUE POINTS
+                if (e.key.toLowerCase() == "f") {
+                    addPoints("blue", 1)
+                }
+                if (e.key.toLowerCase() == "d") {
+                    addPoints("blue", 2)
+                }
+                if (e.key.toLowerCase() == "s") {
+                    addPoints("blue", 3)
+                }
+                if (e.key.toLowerCase() == "e") {
+                    addPoints("blue", 4)
+                }
+
+                // ADD TO RED POINTS
+                if (e.key.toLowerCase() == "j") {
+                    addPoints("red", 1)
+                }
+                if (e.key.toLowerCase() == "k") {
+                    addPoints("red", 2)
+                }
+                if (e.key.toLowerCase() == "l") {
+                    addPoints("red", 3)
+                }
+                if (e.key.toLowerCase() == "i") {
+                    addPoints("red", 4)
+                }
             }
         }
         window.addEventListener('keyup', onKeyup)
         return () => window.removeEventListener('keyup', onKeyup)
-    }, [intervalId, settings]);
+    }, [intervalId, settings, confirmStop]);
+
+    const openSettings = () => {
+        if (!confirmStop) {
+            pauseTimer()
+            setSettings(prevSettings => !prevSettings)
+        }
+    }
+
+    const pauseTimer = () => {
+        if (intervalId && intervalId !== "pause") {
+            clearInterval(intervalId);
+            setIntervalId("pause");
+        }
+    }
 
     const handleClick = () => {
         if (intervalId && intervalId !== "pause") {
@@ -59,13 +116,12 @@ const ScoringBoard = () => {
             setTimeSecond(prevTimeSecond => prevTimeSecond - 1);
         }, 1000);
         setIntervalId(newIntervalId);
-        setLoading(false)
     };
 
     const resetTimer = () => {
         clearInterval(intervalId);
-        setTimeSecond(60)
-        setTimeMinute(2)
+        setTimeSecond(30)
+        setTimeMinute(1)
         setIntervalId(false);
     }
 
@@ -75,18 +131,60 @@ const ScoringBoard = () => {
 
     const stopMatch = () => {
         setConfirmStop(false)
+        resetMatch()
+    }
+
+    const addPoints = (contestant, point) => {
+        if (contestant == "blue") {
+            setScoreBlue(prevScoreBlue => prevScoreBlue + point)
+        }
+        if (contestant == "red") {
+            setScoreRed(prevScoreRed => prevScoreRed + point)
+        }
+    }
+
+    const show_NextRoundModal = () => {
+        setShowNextRoundModal(true)
+    }
+
+    const continueNextRound = () => {
+        setRound(prevRound => prevRound + 1)
+        setShowNextRoundModal(false)
+    }
+
+    const declareWinner = () => {
+        setShowDeclareWinnerModal(true)
+    }
+
+    const declareAsWinner = (winner) => {
+        setShowDeclareAsWinnerModal(true)
+        setDeclaredAsWinner(winner)
+    }
+
+    const closeDeclareWinnerModal = () => {
+        setShowDeclareWinnerModal(false)
+        resetMatch()
+    }
+
+    const closeDeclareAsWinnerModal = () => {
+        setShowDeclareAsWinnerModal(false)
+        resetMatch()
+    }
+
+    const resetMatch = () => {
         resetTimer()
         setScoreBlue(0)
         setScoreRed(0)
         setGamjeumBlue(0)
         setGamjeumRed(0)
+        setRound(1)
     }
 
     return (
         <div className={`${styles.boardWrapper} bg-black`}>
             <div className={`${styles.board}`}>
                 <div className="absolute top-2 right-1 text-white opacity-10 hover:opacity-80 cursor-pointer z-10"
-                    onClick={() => setSettings(!settings)}
+                    onClick={() => openSettings()}
                 >
                     <FaCog className={`${styles.cogIcon}`} />
                 </div>
@@ -107,16 +205,20 @@ const ScoringBoard = () => {
                     <div className={`${styles.scores} flex-grow flex w-100`}>
                         <div className="flex flex-col">
                             <div className={`${styles.scoreWrapper} blue flex flex-grow relative`}>
-                                <div className={`${styles.penalties} bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900 w-1/5`}>
+                                <div className={`${styles.penalties} bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900 w-1/6`}>
                                     <div className="flex flex-wrap w-full py-2">
-                                        {RedGamjeums.map((item, index) => (
-                                            <div key={index} className={`${styles.gamjum} w-1/2 h-1/5`}>
-                                                <div className={`${styles.contentGamjum} ${item <= gamjeumBlue ? "bg-orange-400" : "bg-black"}`}></div>
-                                            </div>
+                                        {gamjeumsCounter.map((item, index) => (
+                                            <Gamjeums key={index}
+                                                item={item}
+                                                gamjeums={gamjeumBlue}
+                                            />
                                         ))}
                                     </div>
                                 </div>
-                                <div className={`${styles.score} font-bold text-white bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 flex-grow flex justify-center items-center`}>
+                                <div className={`${styles.score} font-bold text-white bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 flex-grow flex justify-center items-center relative`}>
+                                    {settings &&
+                                        <div className="absolute top-0 w-full text-center text-xl py-3 bg-gradient-to-r from-gray-500 via-gray-500 to-gray-500 hover:via-gray-300 hover:to-gray-500 cursor-pointer opacity-40 hover:opacity-80 text-black" onClick={() => declareAsWinner("blue")}>Declare as Winner</div>
+                                    }
                                     {scoreBlue}
                                 </div>
                                 {settings &&
@@ -137,41 +239,33 @@ const ScoringBoard = () => {
                             </div>
                         </div>
 
-
-
-
-                        <div className={`${styles.timerWrapper} flex flex-col bg-black text-center`}>
-                            <div className={`${styles.timerTitle} text-white mt-3`}>MATCH</div>
-                            <div className={`${styles.startStop} opacity-0 hover:opacity-100 text-white flex justify-center`}>
-                                <div className={`${intervalId && intervalId == "pause" ? "bg-blue-900" : "bg-green-900"} start w-1/2 grow cursor-pointer`} onClick={handleClick}>
-                                    {intervalId ? intervalId !== "pause" ? "PAUSE" : "RESUME" : "START"}
-                                </div>
-                                {intervalId && intervalId == "pause" ?
-                                    <div className="stop w-1/2 bg-orange-700 cursor-pointer" onClick={confirmToStop}>STOP</div>
-                                    : null}
-                            </div>
-                            <div className={`${styles.timer} mt-5 mb-auto py-3 font-bold bg-yellow-300`}>
-                                {timeMinute > 0 && timeMinute + ":"}{timeSecond == 60 ? "00" : timeSecond < 10 ? "0" + timeSecond : timeSecond}
-                            </div>
-                            <div className={`${styles.round} mt-3 mb-5 text-white`}>
-                                <div className={`${styles.roundTitle} text-white`}>ROUND</div>
-                                <div className={`${styles.roundNumber} text-white`}>1</div>
-                            </div>
-                        </div>
-
-
+                        <RoundTimer
+                            intervalId={intervalId}
+                            timeSecond={timeSecond}
+                            timeMinute={timeMinute}
+                            handleClick={handleClick}
+                            confirmToStop={confirmToStop}
+                            round={round}
+                            declareWinner={declareWinner}
+                            settings={settings}
+                            resetMatch={resetMatch}
+                        />
 
                         <div className="flex flex-col">
                             <div className={`${styles.scoreWrapper} red flex flex-grow relative`}>
-                                <div className={`${styles.score} font-bold text-white bg-gradient-to-r from-red-900 via-red-700 to-red-900 flex-grow flex justify-center items-center`}>
+                                <div className={`${styles.score} font-bold text-white bg-gradient-to-r from-red-900 via-red-700 to-red-900 flex-grow flex justify-center items-center relative`}>
+                                    {settings &&
+                                        <div className="absolute top-0 w-full text-center text-xl py-3 bg-gradient-to-r from-gray-500 via-gray-500 to-gray-500 hover:via-gray-300 hover:to-gray-500 cursor-pointer opacity-40 hover:opacity-80 text-black" onClick={() => declareAsWinner("red")}>Declare as Winner</div>
+                                    }
                                     {scoreRed}
                                 </div>
-                                <div className={`${styles.penalties} bg-gradient-to-b from-gray-900 via-red-900 to-gray-900 w-1/5`}>
+                                <div className={`${styles.penalties} bg-gradient-to-b from-gray-900 via-red-900 to-gray-900 w-1/6`}>
                                     <div className="flex flex-wrap w-full py-2">
-                                        {RedGamjeums.map((item, index) => (
-                                            <div key={index} className={`${styles.gamjum} w-1/2 h-1/5`}>
-                                                <div className={`${styles.contentGamjum} ${item <= gamjeumRed ? "bg-orange-400" : "bg-black"}`}></div>
-                                            </div>
+                                        {gamjeumsCounter.map((item, index) => (
+                                            <Gamjeums key={index}
+                                                item={item}
+                                                gamjeums={gamjeumRed}
+                                            />
                                         ))}
                                     </div>
                                 </div>
@@ -197,19 +291,35 @@ const ScoringBoard = () => {
                 </div>
             </div>
             {confirmStop && (
-                <div className={`${styles.modalWrapper} absolute top-0 left-0 right-0 bottom-0 z-20 flex justify-center items-center`}>
-                    <div className="absolute w-full h-full bg-black opacity-50"></div>
-                    <div className={`${styles.modalCard} relative bg-white rounded-lg p-4 drop-shadow-2xl`}>
-                        <div className={`${styles.modalTitle} text-center font-bold text-gray-800`}>STOP/RESET GAME</div>
-                        <div className={`${styles.modalContent} text-center font-bold text-gray-800`}>Are you sure you want to STOP the match?</div>
-                        <div className='flex justify-center items-center mt-3'>
-                            <div className="py-1 px-4 rounded-md bg-red-600 text-white font-medium mr-3 text-center" style={{ width: "10vw" }} onClick={() => setConfirmStop(false)}>NO</div>
-                            <div className="py-1 px-4 rounded-md bg-green-600 text-white font-medium mr-3 text-center" style={{ width: "10vw" }} onClick={() => {
-                                stopMatch()
-                            }}>YES</div>
-                        </div>
-                    </div>
-                </div>
+                <ConfirmStop
+                    stopMatch={stopMatch}
+                    setConfirmStop={setConfirmStop}
+                />
+            )}
+            {showNextRoundModal && (
+                <NextRound
+                    round={round}
+                    // showNextRoundModal={showNextRoundModal}
+                    setShowNextRoundModal={setShowNextRoundModal}
+                    continueNextRound={continueNextRound}
+                />
+            )}
+            {showDeclareWinnerModal && (
+                <DeclareWinner
+                    scoreBlue={scoreBlue}
+                    scoreRed={scoreRed}
+                    gamjeumBlue={gamjeumBlue}
+                    gamjeumRed={gamjeumRed}
+                    setShowDeclareWinnerModal={setShowDeclareWinnerModal}
+                    closeDeclareWinnerModal={closeDeclareWinnerModal}
+                />
+            )}
+            {showDeclareAsWinnerModal && (
+                <DeclaredAsWinner
+                    declaredAsWInner={declaredAsWinner}
+                    setShowDeclareAsWinnerModal={setShowDeclareAsWinnerModal}
+                    closeDeclareWinnerModal={closeDeclareAsWinnerModal}
+                />
             )}
         </div>
     );
